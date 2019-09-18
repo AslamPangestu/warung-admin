@@ -5,11 +5,11 @@ const Schema = mongoose.Schema; //get class schema from mongoose
 const RoleSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: [true, "Nama masih kosong"]
   },
   description: {
     type: String,
-    required: true
+    required: [true, "Deskripsi masih kosong"]
   },
   created_at: {
     type: Date,

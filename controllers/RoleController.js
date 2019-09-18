@@ -1,7 +1,7 @@
-var Model = require("../models/Role");
+var Role = require("../models/Role");
 
 exports.getAll = (req, res) => {
-  Model.find()
+  Role.find()
     .sort({ created_at: -1 })
     .then(items => {
       if (items.length === 0) {
@@ -10,88 +10,84 @@ exports.getAll = (req, res) => {
         });
       } else if (items === undefined) {
         res.status(404).json({
-          message: "Items not found"
+          message: "Role tidak ditemukan"
         });
       } else {
         res.status(200).json({
-          message: "Success get all items",
+          message: "Daftar role yang ada",
           data: items
         });
       }
+    })
+    .catch(error => {
+      console.error(error);
     });
 };
 
 exports.create = (req, res) => {
-  if (req.body.name === "") {
-    res.status(400).json({
-      status: 400,
-      message: "Name is empty",
-      success: false
-    });
-  } else if (req.body.count === "") {
-    res.status(400).json({
-      status: 400,
-      message: "Count is empty",
-      success: false
-    });
-  } else {
-    const newItem = new Model({
-      name: req.body.name,
-      count: parseInt(req.body.count)
-    });
-    newItem.save().then(item =>
+  const newItem = new Role({
+    name: req.body.name,
+    description: req.body.description
+  });
+  newItem
+    .save()
+    .then(item =>
       res.status(200).json({
-        status: 200,
-        message: "Succes add new item",
-        data: item,
-        success: true
+        message: "Berhasil menambah Role",
+        data: item
       })
-    );
-  }
+    )
+    .catch(error => {
+      console.log(error);
+      res.status(400).json({
+        message: error.message.slice(error.message.lastIndexOf(":") + 2)
+      });
+    });
 };
 
 exports.findById = (req, res) => {
-  Model.findById(req.params.id)
+  Role.findById(req.params.id)
     .then(item =>
       res.status(200).json({
-        status: 200,
-        message: `Succes get data ${req.params.id}`,
-        data: item,
-        success: true
+        message: `Role ${item.name} ditemukan`,
+        data: item
       })
     )
     .catch(err =>
       res.status(404).json({
         status: 404,
-        message: `Failed get data ${req.params.id}. ${err}`,
-        success: false
+        message: "Role tidak ditemukan"
       })
     );
 };
 
 exports.updateById = (req, res) => {
-  Model.updateById(req.params.id, new Role(req.body), function(err, item) {
-    if (err) res.send(err);
-    res.json(item);
-  });
+  Role.findByIdAndUpdate(req.params.id, req.body)
+    .then(item =>
+      res.status(200).json({
+        message: `Berhasi mengubah Role ${item.name}`,
+        data: item
+      })
+    )
+    .catch(err =>
+      res.status(404).json({
+        message: "Role tidak ditemukan"
+      })
+    );
 };
 
 exports.deteleById = (req, res) => {
-  Model.findById(req.params.id)
+  Role.findById(req.params.id)
     .then(item =>
       item.remove().then(() =>
         res.status(200).json({
-          status: 200,
-          message: `Succes remove data ${req.params.id}`,
-          success: true
+          message: `Berhasih menghapus role ${item.name}`,
         })
       )
     )
     .catch(err =>
       res.status(404).json({
-        status: 404,
-        message: `Failed remove data ${req.params.id}. ${err}`,
-        success: false
+        message: "Role tidak ditemukan"
       })
     );
 };
