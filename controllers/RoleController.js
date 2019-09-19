@@ -1,4 +1,5 @@
-var Role = require("../models/Role");
+const Role = require("../models/Role");
+const Utils = require("../utils");
 
 exports.getAll = (req, res) => {
   Role.find()
@@ -7,10 +8,6 @@ exports.getAll = (req, res) => {
       if (items.length === 0) {
         res.status(200).json({
           message: "Belum Ada Data Role"
-        });
-      } else if (items === undefined) {
-        res.status(404).json({
-          message: "Role tidak ditemukan"
         });
       } else {
         res.status(200).json({
@@ -53,27 +50,48 @@ exports.findById = (req, res) => {
         data: item
       })
     )
-    .catch(err =>
-      res.status(404).json({
-        status: 404,
-        message: "Role tidak ditemukan"
-      })
-    );
+    .catch(error => {
+      if (Utils.isEmptyObject(error)) {
+        res.status(404).json({
+          status: 404,
+          message: "Role tidak ditemukan"
+        });
+      } else {
+        res.status(400).json({
+          status: 400,
+          message: "Format salah",
+          error
+        });
+      }
+    });
 };
 
 exports.updateById = (req, res) => {
-  Role.findByIdAndUpdate(req.params.id, req.body)
+  Role.findByIdAndUpdate(
+    req.params.id,
+    { ...req.body, updated_at: Date.now() },
+    { new: true }
+  )
     .then(item =>
       res.status(200).json({
-        message: `Berhasi mengubah Role ${item.name}`,
+        message: `Berhasi mengubah Role menjadi ${item.name}`,
         data: item
       })
     )
-    .catch(err =>
-      res.status(404).json({
-        message: "Role tidak ditemukan"
-      })
-    );
+    .catch(error => {
+      if (Utils.isEmptyObject(error)) {
+        res.status(404).json({
+          status: 404,
+          message: "Role tidak ditemukan"
+        });
+      } else {
+        res.status(400).json({
+          status: 400,
+          message: "Format salah",
+          error
+        });
+      }
+    });
 };
 
 exports.deteleById = (req, res) => {
@@ -81,13 +99,22 @@ exports.deteleById = (req, res) => {
     .then(item =>
       item.remove().then(() =>
         res.status(200).json({
-          message: `Berhasih menghapus role ${item.name}`,
+          message: `Berhasih menghapus role ${item.name}`
         })
       )
     )
-    .catch(err =>
-      res.status(404).json({
-        message: "Role tidak ditemukan"
-      })
-    );
+    .catch(error => {
+      if (Utils.isEmptyObject(error)) {
+        res.status(404).json({
+          status: 404,
+          message: "Role tidak ditemukan"
+        });
+      } else {
+        res.status(400).json({
+          status: 400,
+          message: "Format salah",
+          error
+        });
+      }
+    });
 };
